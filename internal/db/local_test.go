@@ -45,3 +45,40 @@ func TestCache_Get(t *testing.T) {
 	}
 	fmt.Printf("%v\n", value)
 }
+
+func TestCache_Delete(t *testing.T) {
+	d, err := GetDb()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
+		return
+	}
+
+	err = d.Delete("Rose")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
+		return
+	}
+
+}
+
+func TestCache_List(t *testing.T) {
+	d, err := GetDb()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
+		return
+	}
+
+	list, err := d.List()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
+		return
+	}
+
+	v, ok := list.(map[string]interface{})
+	if !ok {
+		return
+	}
+	for k, v := range v {
+		fmt.Printf("name: %s -> %v \n", k, v)
+	}
+}

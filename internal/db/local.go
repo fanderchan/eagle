@@ -55,7 +55,14 @@ func getFilePath() (string, error) {
 
 }
 
-func (c *Cache) rewrite() {}
+func (c *Cache) rewrite(body []byte) error {
+	file, err := os.OpenFile(c.filePath, os.O_RDWR, 0644)
+	defer file.Close()
+	file.Seek(0, 0)
+	file.Truncate(0)
+	_, err = file.Write(body)
+	return err
+}
 
 func (c *Cache) getFileData() (map[string]interface{}, error) {
 	file, err := os.OpenFile(c.filePath, os.O_RDWR, 0644)
@@ -155,6 +162,35 @@ func (c *Cache) Delete(key string) error {
 	}
 
 	delete(m, key)
+	// 写入文件
+	body, err := json.Marshal(m)
+	if err != nil {
+		return err
+	}
 
-	return nil
+	err = c.rewrite(body)
+
+	return err
+}
+
+func (c *Cache) Update(key string, data interface{}) error {
+	m, err := c.getFileData()
+	if err != nil {
+		return err
+	}
+	m[key] = data
+	body, err := json.Marshal(m)
+	if err != nil {
+		return err
+	}
+	return c.rewrite(body)
+}
+
+func (c *Cache) List() (interface{}, error) {
+	m, err := c.getFileData()
+	if err != nil {
+		return nil, err
+	}
+
+	return m, err
 }

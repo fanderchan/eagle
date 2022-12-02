@@ -1,7 +1,6 @@
 package get
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -22,11 +21,13 @@ func NewGet() *cobra.Command {
 	cmd := &cobra.Command{
 		GroupID: "Q",
 		Use:     "get",
-		Short:   "get resources",
-		Long:    `get  resources from map`,
+		Short:   "get resource",
+		Long:    `get resource from local storage`,
 		Run: func(cmd *cobra.Command, args []string) {
 			util.CheckErr(o.Run())
 		},
+		SuggestionsMinimumDistance: 1,
+		SuggestFor:                 []string{"find"},
 	}
 
 	cmd.Flags().StringVarP(&o.Name, "name", "n", "", "get resource by name")
@@ -39,13 +40,11 @@ func (o *GetOptions) Run() error {
 	p := model.Person{}
 	p.Name = o.Name
 
-	v, ok := p.Get()
-	if !ok {
-		return errors.New("record not found")
+	person, err := p.Get()
+	if err != nil {
+		return err
 	}
-
-	fmt.Printf("%v \n", v)
-
+	fmt.Printf("Person {name: %s age: %d sex: %s} \n", person.Name, person.Age, person.Sex)
 	return nil
 
 }
